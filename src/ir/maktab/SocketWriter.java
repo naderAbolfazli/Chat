@@ -26,13 +26,16 @@ public class SocketWriter implements Runnable {
                 String message = input.nextLine();
                 out.writeUTF(message);
                 if (message.equals("exit"))
-                    System.exit(0);
+                    throw new SocketException();
             }
         }catch (SocketException se){
             System.err.println("disconnected");
+            System.exit(0);
         }
         catch (IOException e) {
             e.printStackTrace();
+        }finally {
+            input.close();
         }
     }
 }

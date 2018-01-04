@@ -23,10 +23,11 @@ public class SocketReader implements Runnable {
                 String message = in.readUTF();
                 System.out.println(message);
                 if (message.equals("exit"))
-                    System.exit(0);
+                    throw new SocketException();
             }
         }catch (SocketException se){
             System.err.println("disconnected");
+            System.exit(0);
         }
         catch (IOException e) {
             e.printStackTrace();

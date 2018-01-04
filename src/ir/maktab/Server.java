@@ -5,45 +5,32 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.Scanner;
+import java.util.*;
 
-public class Server implements Runnable{
-    private Socket firstClient;
-    private Socket secondClient;
+public class Server implements Runnable {
+    private Socket client;
+    private static Map<Socket, String> clients = new HashMap<>();
 
-    public Server(Socket client1, Socket client2) {
-        this.firstClient = client1;
-        this.secondClient = client2;
+    public Server(Socket client) {
+        this.client = client;
     }
 
     public static void main(String[] args) throws IOException {
-        Scanner in = new Scanner(System.in);
         ServerSocket serverSocket = new ServerSocket(4030);
-        while (true){
+        while (true) {
             System.out.println("Listening...");
-            Socket client1 = serverSocket.accept();
-            Socket client2 = serverSocket.accept();
-            System.out.println(client1.getLocalAddress()+" Connected to "+client2.getLocalAddress());
-            new Thread(new Server(client1, client2)).start();
+            Socket client = serverSocket.accept();
+            new DataOutputStream(client.getOutputStream()).writeUTF("Enter your Name:");
+            String name = new DataInputStream(client.getInputStream()).readUTF();
+            clients.put(client, name);
+            System.out.println(client.getLocalAddress() + " " + name + " Added to List");
+            System.out.println(client1.getLocalAddress() + " Connected to " + client2.getLocalAddress());
+            new Thread(new ConnectionHandler(client1, client2)).start();
         }
     }
 
     @Override
     public void run() {
-        try {
-            DataInputStream in1 = new DataInputStream(firstClient.getInputStream());
-            DataOutputStream out1 = new DataOutputStream(firstClient.getOutputStream());
-            DataInputStream in2 = new DataInputStream(secondClient.getInputStream());
-            DataOutputStream  out2 = new DataOutputStream(secondClient.getOutputStream());
 
-            out1.writeUTF("you connected");
-            out2.writeUTF("you connected");
-
-            new Thread(new SocketReaderToWriter(in1, out2, firstClient.getLocalAddress(), secondClient.getLocalAddress())).start();
-            new Thread(new SocketReaderToWriter(in2, out1, firstClient.getLocalAddress(), secondClient.getLocalAddress())).start();
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
     }
 }
